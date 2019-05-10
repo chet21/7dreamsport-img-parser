@@ -51,7 +51,13 @@ if(!empty($_POST['link'])){
 
     }
 
-    echo 'Copy complit';
+    unset($_POST['link']);
+
+
+    echo 'Copy complit'.PHP_EOL;
+    echo '<a href="/">start again -></a>';
+
+
 }
 
 
