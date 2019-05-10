@@ -30,21 +30,31 @@ function get_product_link($category_link){
     return $arr_list;
 }
 
-$res = get_product_link('https://7dreamsport.com.ua/g36634429-zhenschiny');
-$i = 0;
-mkdir('result');
+if(!empty($_POST['link'])){
+    $res = get_product_link($_POST['link']);
 
-foreach ($res as $item) {
-    $i++;
-//    $x = get_img($item);
+
+    if(!is_dir('result')){
+        mkdir('result');
+    }else{
+        throw new Exception('Потрібно видалити папку \'result\'');
+    }
+
+    $i = 0;
+    foreach ($res as $item) {
+        $i++;
+        $x = get_img($item);
+        copy($x, __DIR__.'/result/'.$i.'.jpg');
 //   echo '<img src="'.$x.'">';
 //    $phat = './result/'.$i.'.jpg';
 
-    $cl = curl_init($item);
-    
+
+    }
+
+    echo 'Copy complit';
 }
 
-echo 'Copy complit';
+
 
 
 
