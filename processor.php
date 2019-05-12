@@ -1,43 +1,18 @@
 <?php
 
 include __DIR__.'/phpQuery-onefile.php';
-
-
-function get_img($product_link){
-    $html = file_get_contents($product_link);
-    $pq = \phpQuery::newDocument($html);
-    $img = $pq->find('.cs-pictures__img');
-    $img_link = pq($img)->attr('src');
-    $res = ($img_link) ?: null;
-    return $res;
-}
-
-
-function get_product_link($category_link){
-
-    $html = file_get_contents($category_link);
-    $pq = phpQuery::newDocument($html);
-    $list = $pq->find('.cs-page__content-wrap a');
-    $arr_list = [];
-
-    foreach ($list as $item){
-        $link = pq($item)->attr('href');
-        if(preg_match('/^http/', $link)){
-            $arr_list[] = $link;
-        }
-    }
-    $arr_list = array_unique($arr_list);
-    return $arr_list;
-}
+include __DIR__.'/function.php';
 
 if(!empty($_POST['link'])){
-    $res = get_product_link($_POST['link']);
 
+    $res = get_product_link($_POST['link']);
 
     if(!is_dir('result')){
         mkdir('result');
-    }else{
-        throw new Exception('Потрібно видалити папку \'result\'');
+    }
+
+    if(!is_dir('zip_result')){
+        mkdir('zip_result');
     }
 
     $i = 0;
@@ -45,24 +20,29 @@ if(!empty($_POST['link'])){
         $i++;
         $x = get_img($item);
         copy($x, __DIR__.'/result/'.$i.'.jpg');
-//   echo '<img src="'.$x.'">';
-//    $phat = './result/'.$i.'.jpg';
-
-
     }
+
+    $zip = new ZipArchive();
+    $zip->open('zip_result/result.zip', ZipArchive::CREATE);
+
+    if ($handle = opendir('result')) {
+
+        while (false !== ($entry = readdir($handle))) {
+            if ($entry != "." && $entry != "..") {
+                $zip->addFile('result/'.$entry, 'zip_result/'.$entry);
+            }
+        }
+        closedir($handle);
+    }
+
+    $zip->close();
 
     unset($_POST['link']);
 
-
     echo 'Copy complit'.PHP_EOL;
-    echo '<a href="/">start again -></a>';
+    echo '<a href="/">start again -></a>'.PHP_EOL;
+    echo '<a href="zip_result/result.zip">Download result archive</a>'.PHP_EOL;
 
-
+}else{
+    header('location: /');
 }
-
-
-
-
-
-
-
